@@ -2,42 +2,39 @@
 #include <chrono>
 #include <cblas.h>
 
-// 假设世界坐标到屏幕坐标的变换使用 4x4 矩阵乘法
-void multiplyMatrix(const float* vMatrixA, const float* vMatrixB, float* pResultMatrixC, int vSize)
-{
-    cblas_sgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-        vSize, vSize, vSize, 1.0f, vMatrixA, vSize, vMatrixB, vSize, 0.0f, pResultMatrixC, vSize);
+// 矩阵向量乘法：4x4 矩阵与 4x1 向量
+void transformCoordinates(const double* vMatrix, const double* vVector, double* vResultMatrix) {
+    // 使用 cblas_dgemv 进行矩阵-向量乘法
+    // CBLAS_ROW_MAJOR 表示矩阵按行存储
+    cblas_dgemv(CblasRowMajor, CblasNoTrans, 4, 4, 1.0, vMatrix, 4, vVector, 1, 0.0, vResultMatrix, 1);
 }
 
 int main()
 {
-    const int MatrixSize = 4;       // 使用 4x4 矩阵
-    const int Iterations = 1000000; // 每秒进行 100 万次变换
-
-    // 创建 4x4 矩阵，初始化为单位矩阵
-    float pMatrixA[MatrixSize * MatrixSize] = {
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f
+    double pTransformMatrix[16] = {
+        1.0, 0.3, 0.4, 5.0,
+        2.0, 1.4, 4.0, 5.0,
+        0.2, 4.0, 1.0, -1.0,
+        0.0, 0.0, 0.0, 1.0
     };
-    float pMatrixB[MatrixSize * MatrixSize] = {
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f
-    };
-    float pResultMatrix[MatrixSize * MatrixSize]; // 结果矩阵
 
-    auto StartTime = std::chrono::high_resolution_clock::now();
-    for (size_t i = 0; i < Iterations; ++i) 
+    double pWorldCoordinate[4] = { 1.0, 2.0, 3.0, 1.0 };
+    double pScreenCoordinate[4] = { 0.0, 0.0, 0.0, 0.0 };
+    transformCoordinates(pTransformMatrix, pWorldCoordinate, pScreenCoordinate);
+
+    auto Start = std::chrono::high_resolution_clock::now();
+    long long TransformCount = 0;
+
+    while (true) 
     {
-        multiplyMatrix(pMatrixA, pMatrixB, pResultMatrix, MatrixSize); // 进行矩阵乘法运算
+        transformCoordinates(pTransformMatrix, pWorldCoordinate, pScreenCoordinate);
+        TransformCount++;
+        auto Now = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> Elapsed = Now - Start;
+        if (Elapsed.count() >= 1.0) 
+            break;
     }
-    auto EndTime = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> Duration = EndTime - StartTime;
 
-    double TransformsPerSecond = Iterations / Duration.count();
-    std::cout << "每秒完成的变换次数: " << TransformsPerSecond << std::endl;
+    std::cout << "Transforms per second: " << TransformCount << '\n';
     return 0;
 }

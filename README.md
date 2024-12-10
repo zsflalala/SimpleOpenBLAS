@@ -4,6 +4,14 @@
 
 测试在**移动端**的 CPU 上，基于 OpenBLAS，一秒能完成的 **世界坐标系** 到 屏幕像素坐标系 的变换的次数。
 
+## 什么是 OpenBLAS？
+
+OpenBLAS 是一个高性能的矩阵运算库，主要用于提供基础线性代数操作（Basic Linear Algebra Subprograms, **BLAS**）和部分线性代数库（**LAPACK**）的实现。在同样的硬件平台下，不额外花费硬件，不使用 CPU 和加速部件，就能获得很好的计算受益。它提供了多线程支持，可以支持多线程运算。此外，它支持多个操作系统，比如 Linux， Windows， maxOS。
+
+其他类似的库还有 Intel MKL， ATLAS 和 Eigen。
+
+Intel MKL 是专为 Intel CPU 提供的优化，是 Intel 提供的商业库；ATLAS 是另一个 BLAS 的实现； Eigen 是 C++ 的模板库，在大规模矩阵计算性能上可能不如 OpenBLAS。
+
 ## 环境
 
 1. Visual Studio 2022 
@@ -86,3 +94,13 @@ int main()
 ```
 
 ![](./attachments/Env_8.png)
+
+如果需要复习线性代数的基本知识，Gilbert Strang 教授在 MIT OpenCourseWare [（此处）](https://ocw.mit.edu/resources/res-18-010-a-2020-vision-of-linear-algebra-spring-2020/)或 YouTube [（此处）](https://www.youtube.com/playlist?list=PLUl4u3cNGP61iQEFiWLE21EJCxwmWvvek)上制作的一组 6 个 20 分钟的讲座视频可能会有所帮助。
+
+
+
+## 参考资料
+
+1. [OpenBLAS官方Wiki文档](https://github.com/OpenMathLib/OpenBLAS/wiki/Document)
+2. [上海交大超算平台用户手册（Linux）](https://docs.hpc.sjtu.edu.cn/app/compilers_and_languages/openblas.html)
+3. 
