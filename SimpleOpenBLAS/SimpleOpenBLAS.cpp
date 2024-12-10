@@ -1,26 +1,43 @@
 ﻿#include <iostream>
+#include <chrono>
 #include <cblas.h>
 
-static void updateMatrixWithOuterProduct()
+// 假设世界坐标到屏幕坐标的变换使用 4x4 矩阵乘法
+void multiplyMatrix(const float* vMatrixA, const float* vMatrixB, float* pResultMatrixC, int vSize)
 {
-    double x[2] = { 1.0, 2.0 };
-    double y[3] = { 2.0, 1.0, 3.0 };
-    double A[6] = { 0 };
-    blasint rows  = 2, cols  = 3;
-    blasint inc_x = 1, inc_y = 1;
-    blasint lda   = 2;
-    double  alpha = 10;
-    //矩阵按列优先存储
-    //A <== alpha*x*y' + A （y'表示y的转置）
-    cblas_dger(CblasColMajor, rows, cols, alpha, x, inc_x, y, inc_y, A, lda);
-    for (double i : A)
-    {
-        std::cout << i << " ";
-    }
-    std::cout << "\n";
+    cblas_sgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
+        vSize, vSize, vSize, 1.0f, vMatrixA, vSize, vMatrixB, vSize, 0.0f, pResultMatrixC, vSize);
 }
 
 int main()
 {
-    updateMatrixWithOuterProduct();
+    const int MatrixSize = 4;       // 使用 4x4 矩阵
+    const int Iterations = 1000000; // 每秒进行 100 万次变换
+
+    // 创建 4x4 矩阵，初始化为单位矩阵
+    float pMatrixA[MatrixSize * MatrixSize] = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+    float pMatrixB[MatrixSize * MatrixSize] = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+    float pResultMatrix[MatrixSize * MatrixSize]; // 结果矩阵
+
+    auto StartTime = std::chrono::high_resolution_clock::now();
+    for (size_t i = 0; i < Iterations; ++i) 
+    {
+        multiplyMatrix(pMatrixA, pMatrixB, pResultMatrix, MatrixSize); // 进行矩阵乘法运算
+    }
+    auto EndTime = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> Duration = EndTime - StartTime;
+
+    double TransformsPerSecond = Iterations / Duration.count();
+    std::cout << "每秒完成的变换次数: " << TransformsPerSecond << std::endl;
+    return 0;
 }
